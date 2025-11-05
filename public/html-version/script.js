@@ -296,7 +296,7 @@ function setupContactForm() {
     const form = document.getElementById('contactForm');
     const successMessage = document.getElementById('successMessage');
     
-    form.addEventListener('submit', (e) => {
+    form.addEventListener('submit', async (e) => {
         e.preventDefault();
         
         // Get form data
@@ -307,19 +307,55 @@ function setupContactForm() {
             course: document.getElementById('course').value
         };
         
-        // Log form data (in real app, send to server)
-        console.log('Form submitted:', formData);
+        // Disable submit button and show loading state
+        const submitBtn = form.querySelector('button[type="submit"]');
+        const originalBtnText = submitBtn.textContent;
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Submitting...';
         
-        // Show success message
-        form.style.display = 'none';
-        successMessage.classList.add('show');
-        
-        // Reset form after 5 seconds
-        setTimeout(() => {
-            form.style.display = 'block';
-            successMessage.classList.remove('show');
-            form.reset();
-        }, 5000);
+        try {
+            // Save to JSON file (always works)
+            const saveResponse = await fetch('/api/save-submission', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(formData)
+            });
+            
+            if (!saveResponse.ok) {
+                throw new Error('Failed to save submission');
+            }
+            
+            // Try to send email notification (optional - may not be configured)
+            try {
+                await fetch('/api/send-email', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(formData)
+                });
+                console.log('Email notification sent successfully');
+            } catch (emailError) {
+                console.log('Email notification skipped (not configured)');
+            }
+            
+            // Show success message
+            form.style.display = 'none';
+            successMessage.classList.add('show');
+            
+            // Reset form after 5 seconds
+            setTimeout(() => {
+                form.style.display = 'block';
+                successMessage.classList.remove('show');
+                form.reset();
+                submitBtn.disabled = false;
+                submitBtn.textContent = originalBtnText;
+            }, 5000);
+            
+        } catch (error) {
+            console.error('Form submission error:', error);
+            alert('Sorry, there was an error submitting the form. Please try again or contact us directly.');
+            submitBtn.disabled = false;
+            submitBtn.textContent = originalBtnText;
+        }
     });
 }
 
