@@ -1,23 +1,21 @@
-import Header from '@/components/Header'
-import HeroSection from '@/components/HeroSection'
-import AboutSection from '@/components/AboutSection'
-import CoursesSection from '@/components/CoursesSection'
-import SkillsSection from '@/components/SkillsSection'
-import ContactSection from '@/components/ContactSection'
-import Footer from '@/components/Footer'
+'use client'
+
+import { useEffect } from 'react'
+import { useRouter } from 'next/navigation'
 
 export default function Home() {
+  const router = useRouter()
+  
+  useEffect(() => {
+    router.replace('/html-version/index.html')
+  }, [router])
+  
   return (
-    <div className="min-h-screen bg-background">
-      <Header />
-      <main>
-        <HeroSection />
-        <AboutSection />
-        <CoursesSection />
-        <SkillsSection />
-        <ContactSection />
-      </main>
-      <Footer />
+    <div className="min-h-screen flex items-center justify-center bg-background">
+      <div className="text-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+        <p className="text-muted-foreground">Redirecting to DESHON DEVSOL...</p>
+      </div>
     </div>
   )
 }
